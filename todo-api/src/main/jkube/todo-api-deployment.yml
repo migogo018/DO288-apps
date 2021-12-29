@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: todo-migrate
+    jkube.io/git-url: https://github.com/migogo018/DO288-apps
+    app.openshift.io/vcs-uri: https://github.com/migogo018/DO288-apps
+    jkube.io/git-commit: d4d01f5af78059a1e0ced5e7047f21626db1db44
+    jkube.io/git-branch: todo-migrate
+  labels:
+    app: todo-api
+    provider: jkube
+    version: 1.0.0-SNAPSHOT
+    group: com.redhat.training.openshift.todoapi
+  name: todo-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-api
+      provider: jkube
+      group: com.redhat.training.openshift.todoapi
+  template:
+    metadata:
+      labels:
+        app: todo-api
+        provider: jkube
+        version: 1.0.0-SNAPSHOT
+        group: com.redhat.training.openshift.todoapi
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+          - configMapRef:
+              name: todo-migrate
+        image: todo-api:latest
+        imagePullPolicy: IfNotPresent
+        name: quarkus
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
