@@ -12,7 +12,9 @@ COPY . /opt/app-root/src
 
 RUN cd /opt/app-root/src && \
     npm install && \
-    npm run build
+    npm run build && \
+    chgrp -R 0 /opt/app-root && \
+    chmod -R g=u /opt/app-root 
 
 ENV DATABASE_SVC=192.168.0.10
 ENV DATABASE_PORT=3306
